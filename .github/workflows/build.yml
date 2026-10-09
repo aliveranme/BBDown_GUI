@@ -13,13 +13,16 @@ on:
           default: false
           required: false
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     
@@ -74,8 +77,8 @@ jobs:
 
     - name: Update BBDown version
       run: |
-        # Get latest BBDown version and website
-        $url = "https://api.github.com/repos/nilaoda/BBDown/releases/latest"
+        # Get latest BBDown version and website（配套分支 aliveranme/BBDown）
+        $url = "https://api.github.com/repos/aliveranme/BBDown/releases/latest"
         $response = Invoke-WebRequest -Uri $url | ConvertFrom-Json
         $version = $response.name
         $website = $response.html_url
@@ -88,17 +91,27 @@ jobs:
         (Get-Content $filePath) | Foreach-Object {$_ -replace '\$bbdown-version\$', "$version"} | Set-Content $filePath
         (Get-Content $filePath) | Foreach-Object {$_ -replace '\$bbdown-version-url\$', "$website"} | Set-Content $filePath
 
-        # Download BBDown
+        # Download BBDown（win-x64 整包：BBDown.exe + device.wvd + mp4decrypt.exe + mp4decrypt-LICENSE.txt）
         mkdir temp > $null
-        $url = "https://api.github.com/repos/nilaoda/BBDown/releases/latest"
-        $response = Invoke-WebRequest -Uri $url | ConvertFrom-Json
         $asset = $response.assets | Where-Object { $_.name -like "*win-x64*" }
         $browser_download_url = $asset.browser_download_url
         Write-Host BBDown-Download-Url: $browser_download_url
         Invoke-WebRequest -Uri $browser_download_url -OutFile temp/BBDown_win-x64.zip
-        Expand-Archive -Path temp/BBDown_win-x64.zip -DestinationPath ./temp
-        mv temp/BBDown.exe dist/BBDown.exe
-        Remove-Item -Recurse -Force ./temp  
+
+        # （可选）SHA256 校验，防下载损坏/篡改
+        $sums = $response.assets | Where-Object { $_.name -eq "sha256sums.txt" }
+        if ($sums) {
+          Invoke-WebRequest -Uri $sums.browser_download_url -OutFile temp/sha256sums.txt
+          $expected = (((Get-Content temp/sha256sums.txt) | Where-Object { $_ -like "*win-x64.zip" }) -split "\s+")[0]
+          $actual = (Get-FileHash temp/BBDown_win-x64.zip -Algorithm SHA256).Hash
+          if ($actual -ne $expected.ToUpper()) { throw "BBDown zip SHA256 mismatch: $actual vs $expected" }
+          Write-Host "BBDown zip SHA256 OK: $actual"
+        }
+
+        # 解压整包到 dist/（保留 device.wvd、mp4decrypt.exe 等 DRM 开箱即用依赖）
+        Expand-Archive -Path temp/BBDown_win-x64.zip -DestinationPath dist -Force
+        Get-ChildItem dist -Name
+        Remove-Item -Recurse -Force ./temp
 
     - name: Update aria2 version
       run: |
@@ -130,7 +143,7 @@ jobs:
         Remove-Item -Recurse -Force ./temp
 
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v7
       with:
         python-version: "3.10"
     - name: Install dependencies
@@ -143,12 +156,12 @@ jobs:
         mv ./dist/build-to-exe.exe ./dist/BBDown_GUI.exe
     
     - name: Upload a Build Artifact (Full)
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v7
       with:
         name: BBDown_GUI
         path: dist
     - name: Upload a Build Artifact (Single File)
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v7
       with:
         name: BBDown_GUI_single_file
         path: dist/BBDown_GUI.exe
@@ -164,7 +177,7 @@ jobs:
         Compress-Archive -Path dist/* -DestinationPath ./BBDown_GUI_Full.zip
     - name: GH Release
       if: ${{ github.event.inputs.doRelease == 'true' }}
-      uses: softprops/action-gh-release@v0.1.15
+      uses: softprops/action-gh-release@v3
       with:
         files: |
           dist/BBDown_GUI.exe
@@ -178,13 +191,13 @@ jobs:
 
           ### 适配 BBDown
 
-          - 下载地址引入双引号 #10 https://github.com/nilaoda/BBDown/issues/444 e48763e4c34931a666af81aeed8a4d2caa6aa8ce
-          - 跳过AI字幕选项 开启和关闭 #11 411dffc59f5b7dc7b16eb8c51078c7c40571d394
+          - 全面适配 BBDown v1.7.x 新版命令行（-t、-a、--use-intl-api、-d、-I、--access-token、--multi-thread、--hide-streams 等写法），修复旧参数被静默忽略或报错的问题
+          - 子进程输出按 UTF-8 解码，解决中文乱码；停止/关闭窗口时清理整棵进程树，不再残留 BBDown/ffmpeg/aria2c
+          - 配套 BBDown 发行包升级为 win-x64 整包（含 mp4decrypt.exe、device.wvd），DRM 解密开箱即用，下载时附带 SHA256 校验
 
           ### 添加功能
 
-          - 完全隐去了命令行界面，输出在可视化窗口中 00715255a1d857f3195e91ce9ee2a7f960e4808e
-          - 引入了停止下载的功能 a993b061c3a9b20ceae0191412240f36b555f66a
+          - 高级模式新增「更多选项」面板：仅下载弹幕 / 仅下载封面 / 下载评论 / 记录下载历史 / 允许充电试看片段 / 精简混流 / 关闭 DRM 自动解密 / 弹幕格式 / 音视频最小体积优先 / 允许 PCDN 域名 / 跳过 SSL 证书验证
 
           ### 本次更新后蓝奏云包含的各软件版本
           - BBDown - GUI ${{ env.bbdown_gui_version }}

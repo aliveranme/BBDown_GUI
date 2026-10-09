@@ -27,7 +27,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     
@@ -80,8 +80,8 @@ jobs:
 
     - name: Update BBDown version
       run: |
-        # Get latest BBDown version and website
-        $url = "https://api.github.com/repos/nilaoda/BBDown/releases/latest"
+        # Get latest BBDown version and website（配套分支 aliveranme/BBDown）
+        $url = "https://api.github.com/repos/aliveranme/BBDown/releases/latest"
         $response = Invoke-WebRequest -Uri $url | ConvertFrom-Json
         $version = $response.name
         $website = $response.html_url
@@ -93,17 +93,14 @@ jobs:
         (Get-Content $filePath) | Foreach-Object {$_ -replace '\$bbdown-version\$', "$version"} | Set-Content $filePath
         (Get-Content $filePath) | Foreach-Object {$_ -replace '\$bbdown-version-url\$', "$website"} | Set-Content $filePath
 
-        # Download BBDown
+        # Download BBDown（win-x64 整包：BBDown.exe + device.wvd + mp4decrypt.exe + mp4decrypt-LICENSE.txt）
         mkdir temp > $null
-        $url = "https://api.github.com/repos/nilaoda/BBDown/releases/latest"
-        $response = Invoke-WebRequest -Uri $url | ConvertFrom-Json
         $asset = $response.assets | Where-Object { $_.name -like "*win-x64*" }
         $browser_download_url = $asset.browser_download_url
         Write-Host BBDown-Download-Url: $browser_download_url
         Invoke-WebRequest -Uri $browser_download_url -OutFile temp/BBDown_win-x64.zip
-        Expand-Archive -Path temp/BBDown_win-x64.zip -DestinationPath ./temp
-        mv temp/BBDown.exe BBDown_GUI/BBDown.exe
-        Remove-Item -Recurse -Force ./temp  
+        Expand-Archive -Path temp/BBDown_win-x64.zip -DestinationPath BBDown_GUI -Force
+        Remove-Item -Recurse -Force ./temp
 
     - name: Update aria2 version
       run: |
@@ -133,7 +130,7 @@ jobs:
         Remove-Item -Recurse -Force ./temp
 
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v7
       with:
         python-version: '3.x'
     - name: Install dependencies
