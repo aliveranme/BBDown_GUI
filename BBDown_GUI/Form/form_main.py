@@ -20,26 +20,32 @@ bbdowndir = get_bbdowndir()
 class FormMain(QMainWindow, Ui_Form_main):
     def __init__(self):
         def Load(self):
-            f = open(os.path.join(workdir, "config.json"), "r")
-            config = json.loads(f.read())
-            f.close()
-            for item in config:
+            with open(os.path.join(workdir, "config.json"), "r", encoding="utf-8") as f:
+                config = json.loads(f.read())
+            for item, value in config.items():
                 if item == "advanced":
-                    self.advanced = config[item]
+                    self.advanced = bool(value)
                     if self.advanced:
                         self.pushButton_advanced.setText("简易选项<")
                         self.resize(1560, 630)
-                        self.advanced = True
                     else:
                         self.pushButton_advanced.setText("高级选项>")
                         self.resize(620, 400)
-                        self.advanced = False
-                elif type(config[item]) == type(True):
-                    exec(f'self.{item}.setChecked({config[item]})')
-                elif type(config[item]) == type(''):
-                    exec(f'self.{item}.setText(r"{config[item]}")')
-                elif type(config[item]) == type(0):
-                    exec(f'self.{item}.setCurrentIndex({config[item]})')
+                    continue
+                # 按配置值类型直接分派控件方法；不再用 exec 拼接原始字符串——
+                # 含引号或结尾反斜杠的值曾造成 SyntaxError，令其后所有设置被静默丢弃。
+                widget = getattr(self, item, None)
+                if widget is None or value is None:
+                    continue
+                try:
+                    if isinstance(value, bool):
+                        widget.setChecked(value)
+                    elif isinstance(value, str):
+                        widget.setText(value)
+                    elif isinstance(value, int):
+                        widget.setCurrentIndex(value)
+                except (AttributeError, TypeError, ValueError):
+                    continue
         
         super(FormMain, self).__init__()
         self.setupUi(self)
@@ -62,8 +68,8 @@ class FormMain(QMainWindow, Ui_Form_main):
         self.pushButton_about.clicked.connect(self.about)
         try:
             Load(self)
-        except:
-            # 当之前没有保存过任何参数时，界面为默认
+        except Exception:
+            # 之前没有保存过参数、或配置损坏时，界面保持默认
             self.resize(620, 400)
 
     # 当前实际使用的 BBDown.exe 路径：以“程序位置”输入框为准，为空回退默认位置
@@ -95,14 +101,22 @@ class FormMain(QMainWindow, Ui_Form_main):
     # 设置ffmpeg位置
     def ffmpegpath(self):
         filepath, _ = QFileDialog.getOpenFileName(self, "选择文件", os.getcwd(), "ffmpeg (ffmpeg.exe);;All Files (*.*)")
-        filepath = filepath.replace("/","\\")
-        self.lineEdit_ffmpeg.setText(filepath)
+        # 用户取消选择（返回空串）时保留原有路径，不覆盖
+        if filepath:
+            self.lineEdit_ffmpeg.setText(filepath.replace("/", "\\"))
 
     # 设置下载目录
     def opendownpath(self):
-        if not os.path.exists(self.lineEdit_dir.text()):
-            os.makedirs(self.lineEdit_dir.text())
-        os.startfile(self.lineEdit_dir.text())
+        path = self.lineEdit_dir.text().strip().strip('"')
+        if not path:
+            QMessageBox.warning(self, "提示", "下载目录为空，请先填写目录路径")
+            return
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            os.startfile(path)
+        except OSError as e:
+            QMessageBox.warning(self, "提示", f"无法打开下载目录：{e}")
 
     # 设置BBDown位置
     def bbdownpath(self):
@@ -327,7 +341,11 @@ class FormMain(QMainWindow, Ui_Form_main):
             QMessageBox.warning(self, "提示", "已勾选“分P下载时间间隔”，请填写间隔秒数（如 5）")
             return
 
-        self.save_config()
+        try:
+            self.save_config()
+        except Exception:
+            # 配置写入失败（目录只读/被占用等）不应阻断下载本身
+            pass
         args = self.arg()
 
         self.win_output = FormOutput(self.bbdown_exe(), args)
