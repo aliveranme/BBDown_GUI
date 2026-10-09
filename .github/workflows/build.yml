@@ -185,8 +185,6 @@ jobs:
         draft: true
         generate_release_notes: true
         body: |
-          蓝奏云：https://zhiyuyu.lanzout.com/b09axrdjc 密码:down
-
           ### 适配 ${{ env.bbdown_version }} 及之后版本
 
           ### 适配 BBDown
@@ -199,7 +197,7 @@ jobs:
 
           - 高级模式新增「更多选项」面板：仅下载弹幕 / 仅下载封面 / 下载评论 / 记录下载历史 / 允许充电试看片段 / 精简混流 / 关闭 DRM 自动解密 / 弹幕格式 / 音视频最小体积优先 / 允许 PCDN 域名 / 跳过 SSL 证书验证
 
-          ### 本次更新后蓝奏云包含的各软件版本
+          ### 本次更新包含的各软件版本
           - BBDown - GUI ${{ env.bbdown_gui_version }}
           - ${{ env.bbdown_version }}
           - FFmpeg ${{ env.ffmpeg_version }}
