@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='BBDown_GUI',
     version='$pypi-version$',
-    url='https://github.com/1299172402/BBDown_GUI',
+    url='https://github.com/aliveranme/BBDown_GUI',
     license='MIT',
     author='之雨',
     description='BBDown using the graphical interface.',

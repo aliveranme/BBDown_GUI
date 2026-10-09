@@ -4,3 +4,6 @@ include BBDown_GUI/UI/favicon.ico
 include BBDown_GUI/BBDown.exe
 include BBDown_GUI/ffmpeg.exe
 include BBDown_GUI/aria2c.exe
+include BBDown_GUI/device.wvd
+include BBDown_GUI/mp4decrypt.exe
+include BBDown_GUI/mp4decrypt-LICENSE.txt

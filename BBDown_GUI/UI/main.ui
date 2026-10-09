@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1560</width>
-    <height>500</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>1560</width>
-    <height>500</height>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -677,6 +677,9 @@
     <layout class="QVBoxLayout" name="verticalLayout_15">
      <item>
       <widget class="QCheckBox" name="checkBox_ia">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;交互式选择清晰度（GUI 下无终端输入，将自动选择排序靠前的流）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>交互式选择清晰度</string>
        </property>
@@ -1237,6 +1240,224 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_15">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>500</y>
+     <width>911</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>更多选项</string>
+   </property>
+   <widget class="QCheckBox" name="checkBox_danmaku_only">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>24</y>
+      <width>105</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;仅下载弹幕，不下载音视频（--danmaku-only）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>仅下载弹幕</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_cover_only">
+    <property name="geometry">
+     <rect>
+      <x>125</x>
+      <y>24</y>
+      <width>105</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;仅下载封面（--cover-only）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>仅下载封面</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_comments">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>24</y>
+      <width>96</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;同时下载视频评论区，保存为 JSON（--comments）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>下载评论</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_save_archives">
+    <property name="geometry">
+     <rect>
+      <x>346</x>
+      <y>24</y>
+      <width>130</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;将下载过的视频记录到本地文件，用于后续跳过下载同个视频（--save-archives-to-file）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>记录下载历史</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_allow_preview">
+    <property name="geometry">
+     <rect>
+      <x>486</x>
+      <y>24</y>
+      <width>175</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;允许下载充电专属视频的试看片段（默认遇到试看片段直接中止）（--allow-preview）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>允许下载充电试看片段</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_simply_mux">
+    <property name="geometry">
+     <rect>
+      <x>671</x>
+      <y>24</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;精简混流，不增加描述、作者等信息（--simply-mux）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>精简混流</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_no_decrypt_drm">
+    <property name="geometry">
+     <rect>
+      <x>765</x>
+      <y>24</y>
+      <width>135</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;关闭 DRM 自动检测与解密（默认开启自动解密）（--no-decrypt-drm）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>关闭DRM自动解密</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_danmaku_formats">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>56</y>
+      <width>84</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;指定需下载的弹幕格式，用逗号分隔（仅支持 xml,ass）（--download-danmaku-formats）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>弹幕格式</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_danmaku_formats">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>54</y>
+      <width>120</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>如 xml,ass</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_video_ascending">
+    <property name="geometry">
+     <rect>
+      <x>232</x>
+      <y>56</y>
+      <width>160</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;视频升序选择（最小体积优先）（--video-ascending）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>视频最小体积优先</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_audio_ascending">
+    <property name="geometry">
+     <rect>
+      <x>404</x>
+      <y>56</y>
+      <width>160</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;音频升序选择（最小体积优先）（--audio-ascending）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>音频最小体积优先</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_allow_pcdn">
+    <property name="geometry">
+     <rect>
+      <x>576</x>
+      <y>56</y>
+      <width>130</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;不替换 PCDN 域名，仅在正常情况无法下载时使用（--allow-pcdn）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>允许PCDN域名</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_insecure">
+    <property name="geometry">
+     <rect>
+      <x>718</x>
+      <y>56</y>
+      <width>150</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;跳过 SSL 证书验证（仅用于抓包/代理场景）（--insecure）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>跳过SSL证书验证</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>
