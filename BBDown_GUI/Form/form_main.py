@@ -28,7 +28,7 @@ class FormMain(QMainWindow, Ui_Form_main):
                     self.advanced = config[item]
                     if self.advanced:
                         self.pushButton_advanced.setText("简易选项<")
-                        self.resize(1560, 600)
+                        self.resize(1560, 630)
                         self.advanced = True
                     else:
                         self.pushButton_advanced.setText("高级选项>")
@@ -152,7 +152,7 @@ class FormMain(QMainWindow, Ui_Form_main):
         elif self.radioButton_p_new.isChecked():
             args += ['-p', 'NEW']
 
-        # 高级选项
+        # 高级面板其余选项：仅在面板展开时参与（保持原有行为）
         if self.advanced:
             # 下载选项
             if self.checkBox_audio_only.isChecked():
@@ -247,33 +247,38 @@ class FormMain(QMainWindow, Ui_Form_main):
                 if self.checkBox_area.isChecked():
                     args += ['--area', self.lineEdit_area.text()]
 
-            # 新功能选项（BBDown v1.7.x 新增）
-            if self.checkBox_danmaku_only.isChecked():
-                args += ['--danmaku-only']
-            if self.checkBox_cover_only.isChecked():
-                args += ['--cover-only']
-            if self.checkBox_comments.isChecked():
-                args += ['--comments']
-            if self.checkBox_save_archives.isChecked():
-                args += ['--save-archives-to-file']
-            if self.checkBox_allow_preview.isChecked():
-                args += ['--allow-preview']
-            if self.checkBox_simply_mux.isChecked():
-                args += ['--simply-mux']
-            if self.checkBox_no_decrypt_drm.isChecked():
-                args += ['--no-decrypt-drm']
-            if self.checkBox_danmaku_formats.isChecked():
-                v = self.lineEdit_danmaku_formats.text().strip()
-                if v:
-                    args += ['--download-danmaku-formats', v]
-            if self.checkBox_video_ascending.isChecked():
-                args += ['--video-ascending']
-            if self.checkBox_audio_ascending.isChecked():
-                args += ['--audio-ascending']
-            if self.checkBox_allow_pcdn.isChecked():
-                args += ['--allow-pcdn']
-            if self.checkBox_insecure.isChecked():
-                args += ['--insecure']
+        # 新功能选项（BBDown v1.7.x 新增，位于「更多选项」面板）：
+        # 是否生效只取决于自身勾选状态，与高级面板是否展开无关——用户勾选后
+        # 收起面板再下载不应丢失参数（曾导致「仅下载封面」被忽略）。
+        if self.checkBox_danmaku_only.isChecked():
+            args += ['--danmaku-only']
+        if self.checkBox_cover_only.isChecked():
+            args += ['--cover-only']
+        if self.checkBox_comments.isChecked():
+            args += ['--comments']
+        if self.checkBox_save_archives.isChecked():
+            args += ['--save-archives-to-file']
+        if self.checkBox_allow_preview.isChecked():
+            args += ['--allow-preview']
+        if self.checkBox_simply_mux.isChecked():
+            args += ['--simply-mux']
+        if self.checkBox_no_decrypt_drm.isChecked():
+            args += ['--no-decrypt-drm']
+        if self.checkBox_danmaku_formats.isChecked():
+            v = self.lineEdit_danmaku_formats.text().strip()
+            if v:
+                args += ['--download-danmaku-formats', v]
+        if self.checkBox_video_ascending.isChecked():
+            args += ['--video-ascending']
+        if self.checkBox_audio_ascending.isChecked():
+            args += ['--audio-ascending']
+        if self.checkBox_allow_pcdn.isChecked():
+            args += ['--allow-pcdn']
+        if self.checkBox_force_replace.isChecked():
+            # CLI 默认强制替换下载服务器 host；勾选后使用原始地址，备份镜像 404 时可尝试
+            args += ['--force-replace-host', 'false']
+        if self.checkBox_insecure.isChecked():
+            args += ['--insecure']
 
         # 下载路径
         args += ['--work-dir', self.lineEdit_dir.text()]
@@ -284,24 +289,33 @@ class FormMain(QMainWindow, Ui_Form_main):
         args = self.arg()
         self.lineEdit_param.setText(subprocess.list2cmdline(args))
 
+    # 保存当前所有控件状态到 config.json（下载时与关闭窗口时都会调用）
+    def save_config(self):
+        config = {}
+        for i in dir(self):
+            if i[:9] == "checkBox_":
+                config[i] = getattr(self, i).isChecked()
+            elif i[:12] == "radioButton_":
+                config[i] = getattr(self, i).isChecked()
+            elif i[:9] == "lineEdit_":
+                config[i] = getattr(self, i).text()
+            elif i[:9] == "comboBox_":
+                config[i] = getattr(self, i).currentIndex()
+        config["advanced"] = self.advanced
+        f = open(os.path.join(workdir, "config.json"), "w")
+        f.write(json.dumps(config, indent=4))
+        f.close()
+
+    # 关闭主窗口时保存设置，避免“勾选后未点下载就退出”导致勾选状态丢失
+    def closeEvent(self, event):
+        try:
+            self.save_config()
+        except Exception:
+            pass
+        super(FormMain, self).closeEvent(event)
+
     # 开始下载
     def download(self):
-        def Save():
-            config = {}
-            for i in dir(self):
-                if i[:9]=="checkBox_":
-                    exec(f"config[i] = self.{i}.isChecked()")
-                elif i[:12]=="radioButton_":
-                    exec(f"config[i] = self.{i}.isChecked()")
-                elif i[:9]=="lineEdit_":
-                    exec(f"config[i] = self.{i}.text()")
-                elif i[:9]=="comboBox_":
-                    exec(f"config[i] = self.{i}.currentIndex()")
-            config["advanced"] = self.advanced
-            f = open(os.path.join(workdir, "config.json"), "w")
-            f.write(json.dumps(config, indent=4))
-            f.close()
-
         url = self.lineEdit_url.text().strip()
         if not url:
             QMessageBox.warning(self, "提示", "请先填写视频地址")
@@ -313,7 +327,7 @@ class FormMain(QMainWindow, Ui_Form_main):
             QMessageBox.warning(self, "提示", "已勾选“分P下载时间间隔”，请填写间隔秒数（如 5）")
             return
 
-        Save()
+        self.save_config()
         args = self.arg()
 
         self.win_output = FormOutput(self.bbdown_exe(), args)
@@ -324,7 +338,7 @@ class FormMain(QMainWindow, Ui_Form_main):
     def advanced(self):
         if not self.advanced:
             self.pushButton_advanced.setText("简易选项<")
-            self.resize(1560, 600)
+            self.resize(1560, 630)
             self.advanced = True
         else:
             self.pushButton_advanced.setText("高级选项>")
